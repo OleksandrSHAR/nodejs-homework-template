@@ -3,14 +3,14 @@ import { isEmptyBody } from "../../middlewares/index.js";
 import express from "express";
 const router = express.Router();
 
-router.get("/", contactsController.getAllContacts);
+router.get("/", contactsController.getAll);
 
-router.get("/:contactId", contactsController.getContactById);
+router.get("/:id", contactsController.getById);
 
-router.post("/", isEmptyBody, contactsController.addContact);
+router.post("/", isEmptyBody, contactsController.add);
 
-// router.delete("/:contactId", contactsController.deleteContact);
+router.put("/:id", isEmptyBody, contactsController.updateById);
 
-// router.put("/:contactId", isEmptyBody, contactsController.updateContacts);
+router.delete("/:id", contactsController.deleteById);
 
 export default router;

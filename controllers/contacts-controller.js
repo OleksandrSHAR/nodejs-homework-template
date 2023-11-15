@@ -1,8 +1,11 @@
 import contactService from "../models/contacts.js";
 import { HttpError } from "../helpers/index.js";
-import contactsAddShema from "../schemas/contact-shemas.js";
+import {
+  contactsAddSchema,
+  contactsUpdateSchema,
+} from "../schemas/contact-shemas.js";
 
-const getAllContacts = async (req, res, next) => {
+const getAll = async (req, res, next) => {
   try {
     const result = await contactService.listContacts();
     res.json(result);
@@ -10,7 +13,7 @@ const getAllContacts = async (req, res, next) => {
     next(error);
   }
 };
-const getContactById = async (req, res, next) => {
+const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await contactService.getContactById(id);
@@ -22,9 +25,9 @@ const getContactById = async (req, res, next) => {
     next(error);
   }
 };
-const addContact = async (req, res, next) => {
+const add = async (req, res, next) => {
   try {
-    const { error } = contactsAddShema.validate(req.body);
+    const { error } = contactsAddSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
     }
@@ -34,8 +37,38 @@ const addContact = async (req, res, next) => {
     next(error);
   }
 };
+const updateById = async (req, res, next) => {
+  try {
+    const { error } = contactsUpdateSchema.validate(req.body);
+    if (error) {
+      throw HttpError(400, error.message);
+    }
+    const { id } = req.params;
+    const result = await contactService.updateContact(id, req.body);
+    if (!result) {
+      throw HttpError(404, `Contact with id=${id} not found`);
+    }
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+const deleteById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await contactService.deleteContact(id);
+    if (!result) {
+      throw HttpError(404, `Contact with id=${id} not found`);
+    }
+    res.json({ message: "contact deleted" });
+  } catch (error) {
+    next(error);
+  }
+};
 export default {
-  getAllContacts,
-  getContactById,
-  addContact,
+  getAll,
+  getById,
+  add,
+  updateById,
+  deleteById,
 };

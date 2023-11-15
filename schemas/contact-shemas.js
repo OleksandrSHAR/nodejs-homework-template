@@ -1,9 +1,12 @@
 import Joi from "joi";
 
-const contactsAddShema = Joi.object({
+export const contactsAddSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().required(),
-  phone: Joi.number().required(),
+  phone: Joi.string().required(),
 });
-
-export default contactsAddShema;
+export const contactsUpdateSchema = Joi.object({
+  name: Joi.string(),
+  email: Joi.string(),
+  phone: Joi.string(),
+});

@@ -4,6 +4,7 @@ import path from "path";
 const contactsPath = path.resolve("models", "contacts.json");
 const updateContacts = async (contactsList) =>
   fs.writeFile(contactsPath, JSON.stringify(contactsList, null, 2));
+
 async function listContacts() {
   const result = await fs.readFile(contactsPath);
   return JSON.parse(result);
@@ -28,7 +29,7 @@ async function addContact({ name, email, phone }) {
   return newContacts;
 }
 
-async function removeContact(contactId) {
+async function deleteContact(contactId) {
   const contactsList = await listContacts();
   const index = contactsList.findIndex((contact) => contact.id === contactId);
   if (index === -1) {
@@ -53,7 +54,7 @@ async function updateContact(contactId, body) {
 export default {
   listContacts,
   getContactById,
-  removeContact,
+  deleteContact,
   addContact,
   updateContact,
 };
