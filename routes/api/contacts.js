@@ -1,5 +1,9 @@
 import contactsController from "../../controllers/contacts-controller.js";
-import { isEmptyBody, isValidId } from "../../middlewares/index.js";
+import {
+  authenticate,
+  isEmptyBody,
+  isValidId,
+} from "../../middlewares/index.js";
 import { validateBody } from "../../decorators/index.js";
 import {
   contactsAddSchema,
@@ -8,6 +12,8 @@ import {
 } from "../../models/Contact.js";
 import express from "express";
 const router = express.Router();
+
+router.use(authenticate);
 
 router.get("/", contactsController.getAll);
 

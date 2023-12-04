@@ -3,13 +3,22 @@ import { ctrlWrapper } from "../decorators/index.js";
 
 import Contact from "../models/Contact.js";
 const getAll = async (req, res) => {
-  const result = await Contact.find();
-  res.json(result);
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 20, ...filterParams } = req.query;
+  const skip = (page - 1) * limit;
+  const filter = { owner, ...filterParams };
+  const result = await Contact.find(filter, { skip, limit }).populate(
+    "owner",
+    "username email"
+  );
+  const total = await Movie.countDocuments(filter);
+  res.json({ result, total });
 };
 
 const getById = async (req, res) => {
   const { id } = req.params;
-  const result = await Contact.findById(id);
+  const { _id: owner } = req.user;
+  const result = await Contact.findOne({ _id: id, owner });
   if (!result) {
     throw HttpError(404, `Contact with id=${id} not found`);
   }
@@ -17,12 +26,15 @@ const getById = async (req, res) => {
 };
 
 const add = async (req, res) => {
-  const result = await Contact.create(req.body);
+  const { _id: owner } = req.user;
+  console.log(req.user);
+  const result = await Contact.create({ ...req.body, owner });
   res.status(201).json(result);
 };
 const updateById = async (req, res) => {
   const { id } = req.params;
-  const result = await Contact.findByIdAndUpdate(id, req.body);
+  const { _id: owner } = req.user;
+  const result = await Contact.findOneIdAndUpdate({ _id: id, owner }, req.body);
   if (!result) {
     throw HttpError(404, `Contact with id=${id} not found`);
   }
@@ -31,11 +43,12 @@ const updateById = async (req, res) => {
 
 const deleteById = async (req, res) => {
   const { id } = req.params;
-  const result = await Contact.findByIdAndDelete(id);
+  const { _id: owner } = req.user;
+  const result = await Contact.findOneIdAndDelete({ _id: id, owner });
   if (!result) {
     throw HttpError(404, `Contact with id=${id} not found`);
   }
-  res.json({ message: "contact deleted" });
+  res.json({ message: "Contact deleted" });
 };
 export default {
   getAll: ctrlWrapper(getAll),
