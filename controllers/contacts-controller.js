@@ -4,15 +4,9 @@ import { ctrlWrapper } from "../decorators/index.js";
 import Contact from "../models/Contact.js";
 const getAll = async (req, res) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 20, ...filterParams } = req.query;
-  const skip = (page - 1) * limit;
-  const filter = { owner, ...filterParams };
-  const result = await Contact.find(filter, { skip, limit }).populate(
-    "owner",
-    "username email"
-  );
-  const total = await Movie.countDocuments(filter);
-  res.json({ result, total });
+
+  const result = await Contact.find({ owner }).populate("owner", "email");
+  res.json(result);
 };
 
 const getById = async (req, res) => {
@@ -27,14 +21,15 @@ const getById = async (req, res) => {
 
 const add = async (req, res) => {
   const { _id: owner } = req.user;
-  console.log(req.user);
+
   const result = await Contact.create({ ...req.body, owner });
+
   res.status(201).json(result);
 };
 const updateById = async (req, res) => {
   const { id } = req.params;
   const { _id: owner } = req.user;
-  const result = await Contact.findOneIdAndUpdate({ _id: id, owner }, req.body);
+  const result = await Contact.findByIdAndUpdate({ _id: id, owner }, req.body);
   if (!result) {
     throw HttpError(404, `Contact with id=${id} not found`);
   }

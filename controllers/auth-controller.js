@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 
 const { JWT_SECRET } = process.env;
 
-const signup = async (req, res) => {
+const register = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user) {
@@ -15,12 +15,13 @@ const signup = async (req, res) => {
   const hashPassword = await bcrypt.hash(password, 10);
   const newUser = await User.create({ ...req.body, password: hashPassword });
   res.status(201).json({
-    username: newUser.username,
-    email: newUser.email,
+    user: { email: newUser.email, subscription: newUser.subscription },
   });
 };
-const signin = async (req, res) => {
+
+const login = async (req, res) => {
   const { email, password } = req.body;
+
   const user = await User.findOne({ email });
   if (!user) {
     throw HttpError(401, "Email or password is wrong");
@@ -34,26 +35,28 @@ const signin = async (req, res) => {
     id: user._id,
   };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1w" });
+  const { subscription } = user;
+
   await User.findByIdAndUpdate(user._id, { token });
-  res.json({ token });
+  res.json({ token, user: { email: email, subscription: subscription } });
 };
 const getCurrent = async (req, res) => {
-  const { username, email } = req.user;
+  const { email, subscription } = req.user;
+
   res.json({
-    username,
-    email,
+    user: { email: email, subscription: subscription },
   });
 };
 const signout = async (req, res) => {
   const { _id } = req.user;
-  await User.findByIdAndUpdate(_id, { token: "" });
+  await User.findByIdAndUpdate(_id, { token: " " });
   res.json({
     message: "Signout success",
   });
 };
 export default {
-  signup: ctrlWrapper(signup),
-  signin: ctrlWrapper(signin),
+  register: ctrlWrapper(register),
+  login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   signout: ctrlWrapper(signout),
 };
