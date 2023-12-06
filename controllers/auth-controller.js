@@ -13,10 +13,14 @@ const register = async (req, res) => {
     throw HttpError(409, "This email alredy exist");
   }
   const hashPassword = await bcrypt.hash(password, 10);
+
   const newUser = await User.create({ ...req.body, password: hashPassword });
+
   res.status(201).json({
-    email: newUser.email,
-    subscription: newUser.subscription,
+    user: {
+      email: newUser.email,
+      subscription: newUser.subscription,
+    },
   });
 };
 
@@ -39,7 +43,13 @@ const login = async (req, res) => {
   const { subscription } = user;
 
   await User.findByIdAndUpdate(user._id, { token });
-  res.json({ token, user: { email: email, subscription: subscription } });
+  res.json({
+    token,
+    user: {
+      email: email,
+      subscription: subscription,
+    },
+  });
 };
 const getCurrent = async (req, res) => {
   const { email, subscription } = req.user;
@@ -50,7 +60,7 @@ const getCurrent = async (req, res) => {
   });
 };
 const logout = async (req, res) => {
-  const { _id, token } = req.user;
+  const { _id } = req.user;
   await User.findByIdAndUpdate(_id, { token: " " });
 
   res.status(204).json({
