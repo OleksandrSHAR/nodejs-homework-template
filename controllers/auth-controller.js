@@ -3,23 +3,41 @@ import { HttpError } from "../helpers/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
+import fs from "fs/promises";
+import path from "path";
+import gravatar from "gravatar";
 const { JWT_SECRET } = process.env;
-
+const avatarsPath = path.resolve("public", "avatars");
 const register = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user) {
     throw HttpError(409, "This email alredy exist");
   }
+
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+  const avatarURL = gravatar.url(`${email}`);
+
+  // const { path: oldPath, filename } = req.file;
+
+  // const newPath = path.join(avatarsPath, filename);
+
+  // await fs.rename(oldPath, newPath);
+
+  // const avatarURL = path.join("public", "avatars", filename);
+
+  const newUser = await User.create({
+    ...req.body,
+    avatarURL,
+    password: hashPassword,
+  });
 
   res.status(201).json({
     user: {
       email: newUser.email,
       subscription: newUser.subscription,
+      avatarURL: newUser.avatarURL,
     },
   });
 };
@@ -67,9 +85,24 @@ const logout = async (req, res) => {
     message: "No Content",
   });
 };
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: oldPath, filename } = req.file;
+
+  const newPath = path.join(avatarsPath, filename);
+
+  await fs.rename(oldPath, newPath);
+
+  const avatarURL = path.join("public", "avatars", filename);
+
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.status(200).json({ avatarURL: avatarURL });
+};
 export default {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };

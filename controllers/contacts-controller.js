@@ -2,6 +2,7 @@ import { HttpError } from "../helpers/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
 
 import Contact from "../models/Contact.js";
+
 const getAll = async (req, res) => {
   const { _id: owner } = req.user;
 

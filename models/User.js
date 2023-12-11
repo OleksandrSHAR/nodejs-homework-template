@@ -17,6 +17,10 @@ const userShema = new Schema(
       minLenth: 6,
       required: true,
     },
+    avatarURL: {
+      type: String,
+      require: true,
+    },
     subscription: {
       type: String,
       enum: statusSubscrip,
