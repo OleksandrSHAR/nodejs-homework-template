@@ -7,7 +7,7 @@ const authRouter = express.Router();
 
 authRouter.post(
   "/register",
-  upload.single("avatars"),
+  upload.single("avatarURL"),
   isEmptyBody,
   validateBody(userRegisterShema),
   authController.register
@@ -20,7 +20,7 @@ authRouter.post(
 );
 authRouter.patch(
   "/avatars",
-  upload.single("avatars"),
+  upload.single("avatarURL"),
   authenticate,
   authController.updateAvatar
 );

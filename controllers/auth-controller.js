@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import fs from "fs/promises";
 import path from "path";
 import gravatar from "gravatar";
+import Jimp from "jimp";
 const { JWT_SECRET } = process.env;
 const avatarsPath = path.resolve("public", "avatars");
 const register = async (req, res) => {
@@ -18,14 +19,6 @@ const register = async (req, res) => {
   const hashPassword = await bcrypt.hash(password, 10);
 
   const avatarURL = gravatar.url(`${email}`);
-
-  // const { path: oldPath, filename } = req.file;
-
-  // const newPath = path.join(avatarsPath, filename);
-
-  // await fs.rename(oldPath, newPath);
-
-  // const avatarURL = path.join("public", "avatars", filename);
 
   const newUser = await User.create({
     ...req.body,
@@ -87,8 +80,20 @@ const logout = async (req, res) => {
 };
 const updateAvatar = async (req, res) => {
   const { _id } = req.user;
+  if (!req.user) {
+    throw HttpError(401, "Not authorized");
+  }
   const { path: oldPath, filename } = req.file;
-
+  Jimp.read(oldPath)
+    .then((avatar) => {
+      return avatar
+        .resize(250, 250) // resize
+        .quality(60) // set JPEG quality
+        .write(newPath); // save
+    })
+    .catch((err) => {
+      console.error(err);
+    });
   const newPath = path.join(avatarsPath, filename);
 
   await fs.rename(oldPath, newPath);

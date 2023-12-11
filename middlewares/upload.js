@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
 });
 
 const limits = { fileSize: 5 * 1024 * 1024 };
-const fileFilter = () => {
+const fileFilter = (req, file, cb) => {
   const extention = file.originalname.split(".").pop();
   if (extention === "exe") {
     return cb(HttpError(400, "Invalid file"));
