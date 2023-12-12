@@ -79,11 +79,13 @@ const logout = async (req, res) => {
   });
 };
 const updateAvatar = async (req, res) => {
-  const { _id } = req.user;
-  if (!req.user) {
-    throw HttpError(401, "Not authorized");
+  if (!req.file) {
+    throw HttpError(401, "No file to change avatar");
   }
+  const { _id } = req.user;
+
   const { path: oldPath, filename } = req.file;
+
   Jimp.read(oldPath)
     .then((avatar) => {
       return avatar
@@ -98,7 +100,7 @@ const updateAvatar = async (req, res) => {
 
   await fs.rename(oldPath, newPath);
 
-  const avatarURL = path.join("public", "avatars", filename);
+  const avatarURL = path.join("avatars", filename);
 
   await User.findByIdAndUpdate(_id, { avatarURL });
 
